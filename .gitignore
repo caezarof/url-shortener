@@ -35,3 +35,4 @@ build/
 #Ignoring sensitive information
 .env
 src/main/resources/application-dev.properties
+.Notes
