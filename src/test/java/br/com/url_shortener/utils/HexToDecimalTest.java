@@ -3,11 +3,10 @@ package br.com.url_shortener.utils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
 
 class HexToDecimalTest {
     @Test
-    public void convert() throws NoSuchAlgorithmException {
+    public void convert(){
         String hexString = StringToMD5.encode("TestCase");
         BigInteger hexToDecimal = HexToDecimal.convert(hexString);
 
@@ -15,7 +14,7 @@ class HexToDecimalTest {
     }
 
     @Test
-    public void convert1() throws NoSuchAlgorithmException {
+    public void convert1(){
         String hexString = StringToMD5.encode("TestCase", 8);
         BigInteger hexToDecimal = HexToDecimal.convert(hexString);
 

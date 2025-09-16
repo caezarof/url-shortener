@@ -6,18 +6,38 @@ import java.security.NoSuchAlgorithmException;
 
 public class StringToMD5 {
 
-    public static String encode(String text) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("MD5");
-        byte[] originalUrlBytes = text.getBytes(StandardCharsets.UTF_8);
+    private static final int MD5_BYTE_LENGTH = 16;
 
-        digest.update(originalUrlBytes, 0, originalUrlBytes.length);
-        byte[] hashBytes = digest.digest();
+    public static String encode(String text){
+        return encode(text, MD5_BYTE_LENGTH);
+    }
 
+    //Returns a truncated value based in the bytes you want to consider
+    //If no value is passed, we will considerated the full hexadecimal value
+    public static String encode(String text, int bytes) {
+        validateInput(text);
+        validateBytes(bytes);
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] textBytes = text.getBytes(StandardCharsets.UTF_8);
+
+            digest.update(textBytes);
+            byte[] hashBytes = digest.digest();
+
+            return bytesToHex(hashBytes, bytes);
+        } catch (NoSuchAlgorithmException e){
+            throw new IllegalStateException("MD5 algorithm not available.", e);
+        }
+    }
+
+    private static String bytesToHex(byte[] bytes, int length) {
+        int bytesToProcess = Math.min(length, bytes.length);
         StringBuilder hexString = new StringBuilder();
 
-        for (byte b : hashBytes) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1){
+        for (int i = 0; i < bytesToProcess; i++) {
+            String hex = Integer.toHexString(0xff & bytes[i]);
+            if (hex.length() == 1) {
                 hexString.append('0');
             }
             hexString.append(hex);
@@ -26,27 +46,20 @@ public class StringToMD5 {
         return hexString.toString();
     }
 
-    //Returns a truncated value based in the bytes you want to consider
-    public static String encode(String text, int bytes) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("MD5");
-        byte[] originalUrlBytes = text.getBytes(StandardCharsets.UTF_8);
-
-        digest.update(originalUrlBytes, 0, originalUrlBytes.length);
-        byte[] hashBytes = digest.digest();
-
-        int bytesToProcess = Math.min(bytes, hashBytes.length);
-        StringBuilder hexString = new StringBuilder();
-
-        for (int i = 0; i < bytesToProcess; i++){
-            byte b = hashBytes[i];
-
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1){
-                hexString.append('0');
-            }
-            hexString.append(hex);
+    private static void validateInput(String text){
+        if (text == null){
+            throw new IllegalArgumentException("Text cannot be null.");
         }
+        if (text.trim().isEmpty()){
+            throw new IllegalArgumentException("Text cannot be empty or whitespace only.");
+        }
+    }
 
-        return hexString.toString();
+    private static void validateBytes(int bytes){
+        if (bytes < 1 || bytes > MD5_BYTE_LENGTH){
+            throw new IllegalArgumentException(
+                    String.format("Bytes must be between 1 and %d.", MD5_BYTE_LENGTH)
+            );
+        }
     }
 }
