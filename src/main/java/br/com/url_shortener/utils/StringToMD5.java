@@ -13,7 +13,7 @@ public class StringToMD5 {
     }
 
     //Returns a truncated value based in the bytes you want to consider
-    //If no value is passed, we will considerated the full hexadecimal value
+    //If no value is passed, we will be considerate the full hexadecimal value
     public static String encode(String text, int bytes) {
         validateInput(text);
         validateBytes(bytes);
