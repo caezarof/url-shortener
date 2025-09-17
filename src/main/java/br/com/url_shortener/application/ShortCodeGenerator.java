@@ -4,6 +4,7 @@ import br.com.url_shortener.exception.ShortCodeGenerationException;
 import br.com.url_shortener.utils.DecimalToBase62;
 import br.com.url_shortener.utils.HexToDecimal;
 import br.com.url_shortener.utils.StringToMD5;
+import br.com.url_shortener.utils.TextTimestampConcatenator;
 
 import java.math.BigInteger;
 
@@ -12,10 +13,11 @@ public class ShortCodeGenerator {
 
     public static String generate(String originalUrl) {
         if (originalUrl == null || originalUrl.trim().isEmpty()){
-            throw new IllegalArgumentException("Url cannot be null");
+            throw new IllegalArgumentException("Url cannot be null.");
         }
         try{
-            String md5Hash = StringToMD5.encode(originalUrl, DEFAULT_TRUNCATED_BYTES);
+            String urlTimestamp = TextTimestampConcatenator.concatenate(originalUrl);
+            String md5Hash = StringToMD5.encode(urlTimestamp, DEFAULT_TRUNCATED_BYTES);
             BigInteger decimal = HexToDecimal.convert(md5Hash);
             return DecimalToBase62.convert(decimal);
         }catch (IllegalArgumentException e){
