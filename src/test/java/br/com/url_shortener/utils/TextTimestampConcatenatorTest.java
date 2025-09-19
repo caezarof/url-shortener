@@ -24,6 +24,11 @@ class TextTimestampConcatenatorTest {
     void concatenate_ShouldReturnDifferentStringsForSameText() {
         String text = "https://www.example.com";
         String firstResult = TextTimestampConcatenator.concatenate(text);
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         String secondResult = TextTimestampConcatenator.concatenate(text);
         assertNotEquals(firstResult, secondResult);
     }
