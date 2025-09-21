@@ -5,13 +5,15 @@ import br.com.url_shortener.utils.DecimalToBase62;
 import br.com.url_shortener.utils.HexToDecimal;
 import br.com.url_shortener.utils.StringToMD5;
 import br.com.url_shortener.utils.TextTimestampConcatenator;
+import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 
+@Component
 public class ShortCodeGenerator {
     private static final int DEFAULT_TRUNCATED_BYTES = 6;
 
-    public static String generate(String originalUrl) {
+    public String generate(String originalUrl) {
         if (originalUrl == null || originalUrl.trim().isEmpty()){
             throw new IllegalArgumentException("Url cannot be null.");
         }

@@ -6,12 +6,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ShortCodeGeneratorTest {
 
+    private final ShortCodeGenerator shortCodeGenerator = new ShortCodeGenerator();
+
+
     @Test
     void shouldThrowExceptionForNullUrl(){
         String nullUrl = null;
 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> ShortCodeGenerator.generate(nullUrl));
+                () -> shortCodeGenerator.generate(nullUrl));
 
         assertEquals("Url cannot be null.", e.getMessage());
     }
@@ -21,17 +24,17 @@ class ShortCodeGeneratorTest {
         String emptyUrl = "";
 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> ShortCodeGenerator.generate(emptyUrl));
+                () -> shortCodeGenerator.generate(emptyUrl));
 
         assertEquals("Url cannot be null.", e.getMessage());
     }
 
     @Test
     void shouldThrowExceptionForWhiteSpaceOnlyString(){
-        String whiteSpaceString = "";
+        String whiteSpaceString = "    ";
 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> ShortCodeGenerator.generate(whiteSpaceString));
+                () -> shortCodeGenerator.generate(whiteSpaceString));
 
         assertEquals("Url cannot be null.", e.getMessage());
     }
@@ -49,7 +52,7 @@ class ShortCodeGeneratorTest {
         };
 
         for (String url : testUrls){
-            String shortCode = ShortCodeGenerator.generate(url);
+            String shortCode = shortCodeGenerator.generate(url);
 
             assertNotNull(shortCode, "Shortcode should not be null for the url: " + url);
             assertFalse(shortCode.isEmpty(), "Shortcode should not be empty for the url: " + url);
@@ -62,7 +65,7 @@ class ShortCodeGeneratorTest {
     void shouldReturnValidShortCodeForValidUrl(){
         String validUrl = "https://www.example.com";
 
-        String validShortCode = ShortCodeGenerator.generate(validUrl);
+        String validShortCode = shortCodeGenerator.generate(validUrl);
 
         assertTrue(validShortCode.matches("[0-9A-Za-z]+"), "Shortcode must contain only alphanumeric characters.");
         assertTrue(validShortCode.length() >= 6 && validShortCode.length() <= 10,
@@ -75,9 +78,9 @@ class ShortCodeGeneratorTest {
     void shouldReturnDifferentShortCodesForSameUrl() throws InterruptedException {
         String url = "https://www.example.com";
 
-        String shortCode1 = ShortCodeGenerator.generate(url);
+        String shortCode1 = shortCodeGenerator.generate(url);
         Thread.sleep(1);
-        String shortCode2 = ShortCodeGenerator.generate(url);
+        String shortCode2 = shortCodeGenerator.generate(url);
 
         assertNotEquals(shortCode1, shortCode2, "Shortcodes should be different due unique timestamps");
     }
@@ -87,8 +90,8 @@ class ShortCodeGeneratorTest {
         String url1 = "https://www.example.com";
         String url2 = "https://www.example.com.br";
 
-        String shortCode1 = ShortCodeGenerator.generate(url1);
-        String shortCode2 = ShortCodeGenerator.generate(url2);
+        String shortCode1 = shortCodeGenerator.generate(url1);
+        String shortCode2 = shortCodeGenerator.generate(url2);
 
         assertNotEquals(shortCode1, shortCode2, "Shortcodes should be differente due being different urls");
     }

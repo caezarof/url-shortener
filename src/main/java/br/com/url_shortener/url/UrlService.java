@@ -2,45 +2,48 @@ package br.com.url_shortener.url;
 
 import br.com.url_shortener.application.ShortCodeGenerator;
 import br.com.url_shortener.exception.ShortCodeGenerationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class UrlService {
-
+    private static final int MAXIMUM_ATTEMPTS = 3;
     private final UrlEntityRepository repository;
+    private final ShortCodeGenerator shortCodeGenerator;
+    private static final Logger logger = LoggerFactory.getLogger(UrlService.class);
 
-    public UrlService(UrlEntityRepository repository){
+    public UrlService(UrlEntityRepository repository, ShortCodeGenerator shortCodeGenerator){
         this.repository = repository;
+        this.shortCodeGenerator = shortCodeGenerator;
     }
 
-
+    @Transactional
     public UrlEntity create(GenerateUrlDTO dto){
         createValidation(dto);
 
-        String shortCode = null;
-        int MAXIMUM_ATTEMPTS = 3;
+        for (int attempt = 0; attempt < MAXIMUM_ATTEMPTS; attempt++){
+            String shortCode = shortCodeGenerator.generate(dto.originalUrl());
 
-        while (MAXIMUM_ATTEMPTS > 0){
-            try {
-                String shortCodeTry = ShortCodeGenerator.generate(dto.originalUrl());
-                if (!repository.existsByShortCode(shortCodeTry)){
-                    shortCode = shortCodeTry;
-                    break;
-                }
-            } catch (RuntimeException e){
-                throw new ShortCodeGenerationException("Failed to generate short code.", e.getCause());
+            if (repository.existsByShortCode(shortCode)){
+                continue;
             }
-            MAXIMUM_ATTEMPTS--;
+
+            try {
+                UrlEntity shortUrl = new UrlEntity(dto.originalUrl(), shortCode);
+                return repository.save(shortUrl);
+            } catch (DataIntegrityViolationException e){
+                logger.debug("Concurrency detected in attempt {}: {}", attempt + 1, e.getMessage());
+            }
         }
-
-        if (shortCode == null){
-            throw new ShortCodeGenerationException("Could not generate unique short code after 3 attempts. Please try again.");
-        }
-
-        UrlEntity shortUrl = new UrlEntity(dto.originalUrl(), shortCode);
-
-        return repository.save(shortUrl);
+        throw new ShortCodeGenerationException(
+                "Could not generate a unique short code after " + MAXIMUM_ATTEMPTS + " attempts. " +
+                        "Please try again.");
     }
+
 
     private void createValidation(GenerateUrlDTO dto){
         if (dto == null || dto.originalUrl() == null || dto.originalUrl().trim().isEmpty()){
