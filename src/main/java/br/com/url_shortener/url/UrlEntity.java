@@ -36,11 +36,11 @@ public class UrlEntity {
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
-    private Instant createdAt;
+    private final Instant createdAt = Instant.now();
 
     @Column(nullable = false)
     @UpdateTimestamp
-    private Instant updatedAt;
+    private Instant updatedAt = Instant.now();
 
     @Column(nullable = false)
     private Integer accessCount = 0;
