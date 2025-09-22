@@ -39,14 +39,14 @@ class UrlServiceTest {
                 .thenThrow(DataIntegrityViolationException.class)
                 .thenReturn(new UrlEntity(dto.originalUrl(), "code2"));
 
-        UrlEntity result = service.create(dto);
+        CreatedShortenUrlDTO result = service.create(dto);
 
         verify(repository, times(2)).save(any(UrlEntity.class));
         verify(repository, times(1)).existsByShortCode("code1");
         verify(repository, times(1)).existsByShortCode("code2");
         assertNotNull(result);
-        assertEquals(dto.originalUrl(), result.getOriginalUrl());
-        assertEquals("code2", result.getShortCode());
+        assertEquals(dto.originalUrl(), result.originalUrl());
+        assertEquals("code2", result.shortCode());
     }
 
     @Test
@@ -57,16 +57,17 @@ class UrlServiceTest {
                 .thenReturn(false);
 
         UrlEntity expectedEntity = new UrlEntity(dto.originalUrl(), "shortCode");
+
         when(shortCodeGenerator.generate(anyString())).thenReturn("shortCode");
         when(repository.save(any(UrlEntity.class))).thenReturn(expectedEntity);
 
-        UrlEntity result = service.create(dto);
+        CreatedShortenUrlDTO result = service.create(dto);
 
         verify(repository, times(1)).save(any(UrlEntity.class));
 
         assertNotNull(result);
-        assertEquals(dto.originalUrl(), result.getOriginalUrl());
-        assertNotNull(result.getShortCode());
+        assertEquals(dto.originalUrl(), result.originalUrl());
+        assertNotNull(result.shortCode());
     }
 
     @Test
@@ -82,14 +83,14 @@ class UrlServiceTest {
         when(shortCodeGenerator.generate(anyString())).thenReturn("shortCode");
         when(repository.save(any(UrlEntity.class))).thenReturn(expectedEntity);
 
-        UrlEntity result = service.create(dto);
+        CreatedShortenUrlDTO result = service.create(dto);
 
         verify(repository, times(3)).existsByShortCode(anyString());
         verify(repository, times(1)).save(any(UrlEntity.class));
 
         assertNotNull(result);
-        assertEquals(dto.originalUrl(), result.getOriginalUrl());
-        assertNotNull(result.getShortCode());
+        assertEquals(dto.originalUrl(), result.originalUrl());
+        assertNotNull(result.shortCode());
     }
 
     @Test
@@ -104,14 +105,14 @@ class UrlServiceTest {
         when(shortCodeGenerator.generate(anyString())).thenReturn("shortCode");
         when(repository.save(any(UrlEntity.class))).thenReturn(expectedEntity);
 
-        UrlEntity result = service.create(dto);
+        CreatedShortenUrlDTO result = service.create(dto);
 
         verify(repository, times(2)).existsByShortCode(anyString());
         verify(repository, times(1)).save(any(UrlEntity.class));
 
         assertNotNull(result);
-        assertEquals(dto.originalUrl(), result.getOriginalUrl());
-        assertNotNull(result.getShortCode());
+        assertEquals(dto.originalUrl(), result.originalUrl());
+        assertNotNull(result.shortCode());
     }
 
     @Test

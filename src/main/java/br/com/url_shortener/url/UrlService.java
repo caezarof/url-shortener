@@ -21,8 +21,10 @@ public class UrlService {
         this.shortCodeGenerator = shortCodeGenerator;
     }
 
+
+
     @Transactional
-    public UrlEntity create(GenerateUrlDTO dto){
+    public CreatedShortenUrlDTO create(GenerateUrlDTO dto){
         createValidation(dto);
 
         for (int attempt = 0; attempt < MAXIMUM_ATTEMPTS; attempt++){
@@ -34,7 +36,8 @@ public class UrlService {
 
             try {
                 UrlEntity shortUrl = new UrlEntity(dto.originalUrl(), shortCode);
-                return repository.save(shortUrl);
+                repository.save(shortUrl);
+                return new CreatedShortenUrlDTO(shortUrl);
             } catch (DataIntegrityViolationException e){
                 logger.debug("Concurrency detected in attempt {}: {}", attempt + 1, e.getMessage());
             }
