@@ -64,5 +64,8 @@ public class UrlService {
         if (dto.originalUrl().length() > 2048){
             throw new IllegalArgumentException("Url exceeds maximum length.");
         }
+        if (!dto.originalUrl().startsWith("http://") && !dto.originalUrl().startsWith("https://")) {
+            throw new IllegalArgumentException("Url must start with http:// or https://");
+        }
     }
 }

@@ -25,6 +25,17 @@ class UrlServiceTest {
     private UrlService service;
 
     @Test
+    void shouldNotCreateWhenUrlDoesNotStartWithHttpOrHttps(){
+        String originalUrl = "dasdad";
+        GenerateUrlDTO dto = new GenerateUrlDTO(originalUrl);
+
+        IllegalArgumentException e = assertThrows(
+                IllegalArgumentException.class, () -> service.create(dto));
+
+        assertEquals("Url must start with http:// or https://", e.getMessage());
+    }
+
+    @Test
     void createdWithConcurrencyException() {
         GenerateUrlDTO dto = new GenerateUrlDTO("https://www.google.com/");
 
