@@ -2,12 +2,14 @@ package br.com.url_shortener.url;
 
 import br.com.url_shortener.application.ShortCodeGenerator;
 import br.com.url_shortener.exception.ShortCodeGenerationException;
+import br.com.url_shortener.exception.UrlNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 
 @Service
 public class UrlService {
@@ -21,7 +23,14 @@ public class UrlService {
         this.shortCodeGenerator = shortCodeGenerator;
     }
 
-
+    public String getOriginalUrl(String shortCode) {
+        Optional<UrlEntity> result = repository.findByShortCode(shortCode);
+        if (result.isPresent()) {
+            UrlEntity entity = result.get();
+            return entity.getOriginalUrl();
+        }
+        throw new UrlNotFoundException(shortCode);
+    }
 
     @Transactional
     public CreatedShortenUrlDTO create(GenerateUrlDTO dto){

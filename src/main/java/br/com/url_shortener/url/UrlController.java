@@ -1,17 +1,14 @@
 package br.com.url_shortener.url;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
 @RestController
-@RequestMapping
 public class UrlController {
 
     private final UrlService service;
@@ -24,7 +21,15 @@ public class UrlController {
     public ResponseEntity<CreatedShortenUrlDTO> shortenUrl(
             @RequestBody @Valid GenerateUrlDTO generateUrlDto, UriComponentsBuilder uriBuilder){
         CreatedShortenUrlDTO shortenUrl = service.create(generateUrlDto);
-        URI uri = uriBuilder.path("/urls/{id}").buildAndExpand(shortenUrl.id()).toUri();
+        URI uri = uriBuilder.path("/{shortcode}").buildAndExpand(shortenUrl.shortCode()).toUri();
         return ResponseEntity.created(uri).body(shortenUrl);
+    }
+
+    @GetMapping("/{shortCode}")
+    public ResponseEntity<Void> redirect(@PathVariable String shortCode) {
+        String originalUrl = service.getOriginalUrl(shortCode);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(originalUrl))
+                .build();
     }
 }
