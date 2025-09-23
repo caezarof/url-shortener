@@ -1,6 +1,7 @@
 package br.com.url_shortener.url;
 
 import br.com.url_shortener.application.ShortCodeGenerator;
+import br.com.url_shortener.exception.InvalidUrlException;
 import br.com.url_shortener.exception.ShortCodeGenerationException;
 import br.com.url_shortener.exception.UrlNotFoundException;
 import org.slf4j.Logger;
@@ -9,7 +10,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @Service
 public class UrlService {
@@ -23,13 +25,35 @@ public class UrlService {
         this.shortCodeGenerator = shortCodeGenerator;
     }
 
-    public String getOriginalUrl(String shortCode) {
-        Optional<UrlEntity> result = repository.findByShortCode(shortCode);
-        if (result.isPresent()) {
-            UrlEntity entity = result.get();
-            return entity.getOriginalUrl();
+    @Transactional
+    public String getOriginalUrlAndIncrementAccess(String shortCode) {
+        UrlEntity result = repository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+
+        String originalUrl = result.getOriginalUrl();
+
+        if(!isValidUrl(originalUrl)){
+            throw new InvalidUrlException("Invalid url format for shortcode: " + shortCode);
         }
-        throw new UrlNotFoundException(shortCode);
+
+        incrementAccessCount(result.getId());
+
+        return originalUrl;
+    }
+
+    private void incrementAccessCount(Long id){
+        repository.incrementAccessCount(id);
+    }
+
+    private boolean isValidUrl(String url) {
+        try {
+            URI uri = new URI(url);
+            return uri.getScheme() != null &&
+                    uri.getHost() != null &&
+                    (uri.getScheme().equals("http") || uri.getScheme().equals("https"));
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 
     @Transactional
@@ -64,8 +88,8 @@ public class UrlService {
         if (dto.originalUrl().length() > 2048){
             throw new IllegalArgumentException("Url exceeds maximum length.");
         }
-        if (!dto.originalUrl().startsWith("http://") && !dto.originalUrl().startsWith("https://")) {
-            throw new IllegalArgumentException("Url must start with http:// or https://");
+        if (!isValidUrl(dto.originalUrl())) {
+            throw new InvalidUrlException("Url must start with http:// or https://");
         }
     }
 }
