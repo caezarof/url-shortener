@@ -24,6 +24,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e){
         ErrorResponse error = new ErrorResponse("INVALID_REQUEST", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+    }
+    @ExceptionHandler(InvalidUrlException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUrlException(IllegalArgumentException e){
+        ErrorResponse error = new ErrorResponse("INVALID_REQUEST", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     public record ErrorResponse(String code, String message){}
