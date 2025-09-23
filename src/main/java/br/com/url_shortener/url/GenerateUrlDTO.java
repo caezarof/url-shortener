@@ -5,5 +5,5 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 
-public record GenerateUrlDTO(@NotNull @NotBlank @Length(max = 2048) @URL String originalUrl) {
+public record GenerateUrlDTO(@NotNull @NotBlank @Length(max = 2048) @URL(message = "Url must start with http:// or https://") String originalUrl) {
 }
