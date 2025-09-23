@@ -1,6 +1,7 @@
 package br.com.url_shortener.url;
 
 import br.com.url_shortener.application.ShortCodeGenerator;
+import br.com.url_shortener.exception.InvalidUrlException;
 import br.com.url_shortener.exception.ShortCodeGenerationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,6 +26,16 @@ class UrlServiceTest {
 
     @InjectMocks
     private UrlService service;
+
+    @Test
+    void shouldThrowInvalidUrlException(){
+        UrlEntity entity = new UrlEntity("htt://sdada", "sadad311");
+
+        when(repository.findByShortCode(anyString())).thenReturn(Optional.of(entity));
+
+
+        assertThrows(InvalidUrlException.class, () -> service.getOriginalUrlAndIncrementAccess(entity.getShortCode()));
+    }
 
     @Test
     void shouldNotCreateWhenUrlDoesNotStartWithHttpOrHttps(){
