@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public record CreatedShortenUrlDTO(Long id, String originalUrl, String shortCode, String createdAtFormatted) {
+public record CreatedShortenUrlDTO(Long id, String originalUrl, String shortCode, String createdAt) {
 
     public CreatedShortenUrlDTO(UrlEntity shortenUrl){
         this(shortenUrl.getId(), shortenUrl.getOriginalUrl(), shortenUrl.getShortCode(),
